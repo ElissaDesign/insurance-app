@@ -25,7 +25,6 @@ import {
 } from "firebase/firestore";
 
 export default function () {
-  //   const todoRef = firebase.firestore().collection("users");
   const usersCollectionRef = collection(db, "users");
 
   const [name, setName] = useState("");
@@ -38,28 +37,16 @@ export default function () {
 
   const handleSubmit = async () => {
 
-    function generateRandomNumbers() {
-      var numbers = '';
-      for (var i = 0; i < 3; i++) {
-        var randomNumber = Math.floor(Math.random() * 100) + 1;
-        numbers += randomNumber;
-      }
-      return numbers;
-    }
-
-    var code = generateRandomNumbers();
-    console.log("----code: ", code)
     // Create a query to retrieve the document
     const queryRef = query(
       usersCollectionRef,
-      where("email", "==", email),
-      where("code", "==", code)
+      where("email", "==", email)
     );
 
     if (name && name.length > 0) {
       setIsLoading(true);
 
-      const data = { name, Nid, code, email, password };
+      const data = { name, Nid, email, password };
       try {
         // Get the documents that match the query
         const querySnapshot = await getDocs(queryRef);
@@ -139,7 +126,7 @@ export default function () {
               className="mt-6 bg-[#932326] px-4 py-2 rounded "
             >
               <Text className="text-lg font-semibold text-white text-center">
-                {isLoading ? "Loading..." : "Sign up"}
+                {isLoading ? "Loading..." : "Pay"}
               </Text>
             </TouchableOpacity>
           </View>

@@ -5,6 +5,7 @@ import {
   Text,
   View,
   KeyboardAvoidingView,
+  Image,
   ScrollView,
   SafeAreaView,
   TouchableOpacity,
@@ -84,41 +85,58 @@ export default function () {
     <KeyboardAvoidingView>
       <ScrollView className="bg-white h-[100%]">
         <SafeAreaView className="bg-white max-h-full pt-4">
-          <View className="p-4 flex flex-col items-center justify-center ">
+          <View className="flex items-center justify-center px-4 ">
+            <Image
+              source={require("../assets/R.png")}
+              style={{ width: 200, height: 200 }}
+              resizeMode="contain"
+            />
+            {/* <Text className="text-md text-lg font-semibold">Welcome to insurance app!</Text> */}
+
+            <Text className="text-md text-center text-lg font-semibold mt-4 text-gray-800">
+              Get Started with
+            </Text>
+
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Motal Insurance")}
+              className="mt-6 bg-[#932326] px-4 py-2 rounded-full w-20 h-20 flex items-center justify-center "
+            >
+              <Icon name="car-outline" size={40} color="#FFF" />
+
+            </TouchableOpacity>
+
             <View>
-              <Text className="my-4">Request!!</Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate("Request")}
-                className="bg-blue-800 w-14 h-14 rounded-full flex items-center justify-center"
-              >
-                <Icon name="add-outline" size={30} color="#FFF" />
-              </TouchableOpacity>
+              <Text className="text-center text-lg font-semibold text-black">Motal insurance</Text>
             </View>
 
-            {requests && requests.length == 0 ? (
-              <Text className="mt-12">No requests...</Text>
-            ) : (
-              <View className="mt-12">
-                {requests.map((request) => {
-                  return (
-                    <View
-                      key={request.desc}
-                      className="mt-4 bg-blue-100 w-full p-4 rounded"
-                    >
-                      <Text className="text-lg font-semibold">
-                        {request.title}
-                      </Text>
-                      <Text className="text-base">{request.desc}</Text>
-                      <Text className="font-bold text-blue-800">
-                        Status:{" "}
-                        {request.solved === false ? "Pending" : "Solved"}
-                      </Text>
-                    </View>
-                  );
-                })}
-              </View>
-            )}
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Login")}
+              className="mt-6 bg-[#932326] px-4 py-2 rounded-full w-20 h-20 flex items-center justify-center "
+            >
+              <Icon name="person-outline" size={40} color="#FFF" />
+
+            </TouchableOpacity>
+
+            <Text className=" text-center text-lg font-semibold text-black">Life insurance</Text>
+
+
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Claim")}
+              className="mt-6 bg-[#932326] px-4 py-2 rounded-full w-20 h-20 flex items-center justify-center "
+            >
+              <Icon name="alert-circle-outline" size={40} color="#FFF" />
+
+            </TouchableOpacity>
+
+            <Text className=" text-center text-lg font-semibold text-black">Claim</Text>
+
           </View>
+
+          <Text className="text-center text-sm mt-8">&copy; 2023,Insurance| for admins ||
+            <Text onPress={() => navigation.navigate("Login")}
+              className="text-black text-center ml-4"> Login</Text>
+
+          </Text>
         </SafeAreaView>
       </ScrollView>
     </KeyboardAvoidingView>

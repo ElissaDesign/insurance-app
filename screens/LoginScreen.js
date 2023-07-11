@@ -5,8 +5,11 @@ import {
   StatusBar,
   Text,
   TextInput,
+  Image,
   View,
   Button,
+  KeyboardAvoidingView,
+  ScrollView,
   TouchableOpacity,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -26,7 +29,7 @@ import {
 export default function () {
   const usersCollectionRef = collection(db, "users");
 
-  const [regN, setRegN] = useState("");
+  const [code, setCode] = useState("");
   const [password, setPass] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -36,9 +39,9 @@ export default function () {
     const queryRef = query(
       usersCollectionRef,
       where("password", "==", password),
-      where("regN", "==", regN)
+      where("code", "==", code)
     );
-    if (regN && regN.length > 0 && password && password.length > 0) {
+    if (code && code.length > 0 && password && password.length > 0) {
       setIsLoading(true);
       try {
         // Get the documents that match the query
@@ -58,6 +61,12 @@ export default function () {
 
           if (user.role == "admin") {
             return navigation.navigate("Admin");
+          } else if (user.role == "gmanager") {
+            return navigation.navigate("General Manager")
+          } else if (user.role == "smanager") {
+            return navigation.navigate("Sales Manager")
+          } else if (user.role == "cmanager") {
+            return navigation.navigate("Claim Manager")
           }
           return navigation.navigate("User");
         });
@@ -69,56 +78,62 @@ export default function () {
   };
 
   return (
-    <SafeAreaView className="bg-white h-screen  pt-8">
-      <View className="p-4 ">
-        <Text className="text-md text-center text-lg font-medium">
-          Welcome back!
-        </Text>
-        <Text className="text-md text-center text-base text-gray-700 mt-4">
-          Until recently, the prevailing view assumed lorem ipsum was born as a
-          nonsense text.
-        </Text>
+    <KeyboardAvoidingView>
+      <ScrollView className="bg-white h-[100%]">
+        <SafeAreaView className="bg-white h-screen  pt-2">
+          <View className="px-4 ">
+            <View className="flex items-center justify-center">
+              <Image
+                source={require("../assets/W.png")}
+                style={{ width: 200, height: 200 }}
+                resizeMode="contain"
+              />
+            </View>
+            <Text className="text-md text-center text-lg font-medium">
+              Please sign in!
+            </Text>
+            <View className="mt-4">
+              <Text className="text-gray-700 text-base mb-2">Code:</Text>
+              <TextInput
+                onChangeText={(text) => setCode(text)}
+                value={code}
+                placeholder="Enter code..."
+                className="border border-[#932326] rounded-md p-2"
+              />
+            </View>
 
-        <View className="mt-10">
-          <Text className="text-gray-700 text-base mb-2">RegN:</Text>
-          <TextInput
-            onChangeText={(text) => setRegN(text)}
-            value={regN}
-            placeholder="Enter regNo..."
-            className="border border-blue-500 rounded-md p-2"
-          />
-        </View>
+            <View className="mt-4">
+              <Text className="text-gray-700 text-base mb-2">Password:</Text>
+              <TextInput
+                onChangeText={(text) => setPass(text)}
+                value={password}
+                placeholder="Enter password..."
+                className="border border-[#932326] rounded-md p-2"
+              />
+            </View>
+            <View className="mt-4">
+              <Text className="text-gray-700 text-base mb-2">
+                Don't have an account?{" "}
+                <Text
+                  onPress={() => navigation.navigate("Register")}
+                  className="text-[#932326] font-medium"
+                >
+                  Please Sign up
+                </Text>{" "}
+              </Text>
+            </View>
 
-        <View className="mt-4">
-          <Text className="text-gray-700 text-base mb-2">Password:</Text>
-          <TextInput
-            onChangeText={(text) => setPass(text)}
-            value={password}
-            placeholder="Enter password..."
-            className="border border-blue-500 rounded-md p-2"
-          />
-        </View>
-        <View className="mt-4">
-          <Text className="text-gray-700 text-base mb-2">
-            Don't have an account?{" "}
-            <Text
-              onPress={() => navigation.navigate("Register")}
-              className="text-blue-500 font-medium"
+            <TouchableOpacity
+              onPress={handleSubmit}
+              className="mt-6 bg-[#932326] px-4 py-2 rounded "
             >
-              Please Sign up
-            </Text>{" "}
-          </Text>
-        </View>
-
-        <TouchableOpacity
-          onPress={handleSubmit}
-          className="mt-6 bg-blue-800 px-4 py-2 rounded "
-        >
-          <Text className="text-lg font-semibold text-white text-center">
-            {isLoading ? "Loading.." : " Sign in"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+              <Text className="text-lg font-semibold text-white text-center">
+                {isLoading ? "Loading.." : " Sign in"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

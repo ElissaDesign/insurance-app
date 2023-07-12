@@ -61,11 +61,11 @@ export default function () {
 
           if (user.role == "admin") {
             return navigation.navigate("Admin");
-          } else if (user.role == "gmanager") {
+          } else if (user.role == "general") {
             return navigation.navigate("General Manager")
-          } else if (user.role == "smanager") {
+          } else if (user.role == "sales") {
             return navigation.navigate("Sales Manager")
-          } else if (user.role == "cmanager") {
+          } else if (user.role == "claim") {
             return navigation.navigate("Claim Manager")
           }
           return navigation.navigate("User");

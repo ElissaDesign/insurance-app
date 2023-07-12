@@ -100,7 +100,7 @@ export default function () {
 
                             <View className="flex items-center justify-center ">
                                 <TouchableOpacity
-                                    onPress={() => navigation.navigate("Pay Motal Insurance")}
+                                    onPress={() => navigation.navigate("Pay Life Insurance")}
                                     className="mt-6 bg-[#932326] px-4 py-2 rounded-full w-24 h-24 flex items-center justify-center "
                                 >
                                     <Text className="text-center text-white text-xl">Click & Pay</Text>

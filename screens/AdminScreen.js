@@ -23,11 +23,14 @@ import {
 } from "firebase/firestore";
 
 export default function () {
-  const requestsCollectionRef = collection(db, "requests");
+  const navigation = useNavigation();
+
+  const usersCollectionRef = collection(db, "users");
 
   const [requests, setRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdateLoading, setIsUpdateLoading] = useState(false);
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
   const updateRequest = async (id) => {
     setRequests((prevRequests) =>
@@ -50,30 +53,106 @@ export default function () {
     setIsUpdateLoading(false);
   };
 
+  const deleteDocsByQuery = async (code) => {
+    console.log("Code: " , code)
+  const queryRef = query(collection(db, "users"), where("code", "==", code));
+
+  try {
+    const querySnapshot = await getDocs(queryRef);
+
+    if (querySnapshot.empty) {
+      console.log("No matching documents found.");
+      return;
+    }
+
+    querySnapshot.forEach(async (doc) => {
+      try {
+        await deleteDoc(doc.ref);
+        console.log("Document deleted:", doc.id);
+      } catch (error) {
+        console.error("Error deleting document:", doc.id, error);
+      }
+    });
+  } catch (error) {
+    console.error("Error retrieving documents:", error);
+  }
+};
+
+
   useEffect(() => {
-    const getRequests = async () => {
-      const data = await getDocs(requestsCollectionRef);
-      const requestsData = data.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      }));
-      setRequests(requestsData);
+    const getData = async () => {
+      const queryRef = query(usersCollectionRef, where("role", "!=", null));
+
+      try {
+        // Get the documents that match the query
+        const querySnapshot = await getDocs(queryRef);
+
+        if (querySnapshot.empty) {
+          console.log("No matching documents.");
+          setIsLoading(false);
+          return;
+        }
+
+        const dataArray = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          dataArray.push({ ...data });
+        });
+
+        setRequests(dataArray);
+        setIsLoading(false);
+      } catch (error) {
+        alert(error);
+        setIsLoading(false);
+      }
     };
 
-    getRequests();
+    getData();
 
-    const interval = setInterval(getRequests, 3000);
-
+    const interval = setInterval(getData, 2000);
     return () => {
       clearInterval(interval);
     };
   }, []);
+
+  //  -------------------------
+
+  // useEffect(() => {
+  //   const getRequests = async () => {
+  //     const data = await getDocs(requestsCollectionRef);
+  //     const requestsData = data.docs.map((doc) => ({
+  //       ...doc.data(),
+  //       id: doc.id,
+  //     }));
+  //     setRequests(requestsData);
+  //   };
+
+  //   getRequests();
+
+  //   const interval = setInterval(getRequests, 3000);
+
+  //   return () => {
+  //     clearInterval(interval);
+  //   };
+  // }, []);
+
+  // console.log("R------", requests);
   return (
     <KeyboardAvoidingView>
       <ScrollView className="bg-white h-[100%]">
         <SafeAreaView className="bg-white max-h-full">
           <View className="p-4 ">
-            <Text className=" text-center text-md text-lg font-semibold">
+            <View className="flex items-center justify-center ">
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Invite Manager")}
+                className="mt-6 bg-[#932326] px-4 py-2 rounded-xl flex items-center justify-center "
+              >
+                <Text className="text-center text-white text-xl">
+                  Click to Invite managers
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <Text className=" text-center text-md text-lg font-semibold mt-4">
               List of the Requests !
             </Text>
 
@@ -85,40 +164,29 @@ export default function () {
                   return (
                     <View
                       key={request.id}
-                      className="mt-4 bg-blue-100 w-full p-4 rounded shadow-md"
+                      className="mt-4 border border-[#932326]  w-full p-4 rounded shadow-md"
                     >
                       <View className="flex flex-row items-center justify-start">
-                        <Text className="text-lg font-semibold text-blue-800">
+                        <Text className="text-lg font-semibold text-gray-800">
                           {request.name}
                         </Text>
-                        <Text className="bg-blue-800 text-white px-2 rounded ml-4">
-                          {request.regN}
+                        <Text className="text-black px-2 rounded ml-4">
+                          {request.role} Manager
                         </Text>
                       </View>
                       <Text className="text-lg font-semibold">
-                        {request.title}
+                        NID: {request.Nid}
                       </Text>
-                      <Text className="text-base">{request.desc}</Text>
-                      <View className="flex flex-row items-center">
-                        <Text className="font-bold text-blue-800">
-                          Status:{" "}
-                          {request.solved === false ? "Pending" : "Solved"}
-                        </Text>
-                        {!request.solved === false ? (
-                          ""
-                        ) : (
-                          <TouchableOpacity
-                            className="ml-4"
-                            onPress={() => {
-                              updateRequest(request.id);
-                            }}
-                          >
-                            <Text>
-                              {request.updating ? "Updating" : "Approve"}
-                            </Text>
-                          </TouchableOpacity>
-                        )}
-                      </View>
+                      <Text className="text-base">Email: {request.email}</Text>
+                      <Text className="text-base">Code: {request.code}</Text>
+                      <TouchableOpacity
+                        className="bg-[#932326] w-16 p-[4px] rounded mt-2"
+                        onPress={() => {
+                          deleteDocsByQuery(request?.code);
+                        }}
+                      >
+                        <Text className="text-white">Delete</Text>
+                      </TouchableOpacity>
                     </View>
                   );
                 })}

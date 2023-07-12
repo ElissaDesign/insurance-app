@@ -110,7 +110,7 @@ export default function () {
             </View>
 
             <TouchableOpacity
-              onPress={() => navigation.navigate("Login")}
+              onPress={() => navigation.navigate("Life Insurance")}
               className="mt-6 bg-[#932326] px-4 py-2 rounded-full w-20 h-20 flex items-center justify-center "
             >
               <Icon name="person-outline" size={40} color="#FFF" />

@@ -1,66 +1,158 @@
 import { useNavigation } from "@react-navigation/native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   SafeAreaView,
-  StatusBar,
   Text,
   TextInput,
   View,
-  Button,
   TouchableOpacity,
   KeyboardAvoidingView,
   ScrollView,
+  Button,
 } from "react-native";
+import { SelectList } from "react-native-dropdown-select-list";
 import { db } from "../Firebase";
+import { storage } from "../Firebase";
+import { collection, addDoc } from "firebase/firestore";
+import * as DocumentPicker from "expo-document-picker";
 import {
-  collection,
-  getDocs,
-  getDoc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  query,
-  where,
-} from "firebase/firestore";
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
 
 export default function () {
-  const usersCollectionRef = collection(db, "users");
+  const lifeInsuranceCollectionRef = collection(db, "lifeInsurance");
+
+  const company = [
+    { key: "1", value: "Company", disabled: true },
+    { key: "2", value: "Prime Insurance" },
+    { key: "3", value: "Sonarwa Insurance" },
+  ];
+  const insurance_Type = [
+    { key: "1", value: "Insurance Type", disabled: true },
+    { key: "2", value: "Pansion" },
+    { key: "3", value: "Savings" },
+  ];
 
   const [name, setName] = useState("");
   const [Nid, setNid] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPass] = useState("");
+
+  const [companyName, setCompanyName] = useState("");
+  const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("");
+  const [insuranceType, setInsuranceType] = useState("");
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+
+  const [fileName, setFileName] = useState("");
+  const [fileUrl, setFileUrl] = useState("");
+
   const [isLoading, setIsLoading] = useState(false);
 
   const navigation = useNavigation();
 
+  const handleFilePicker = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync();
+      if (result.type === "success") {
+        // console.log("URI:", result.uri);
+        // console.log("Name:", result.name);
+        // console.log("Type:", result.type);
+        // console.log("Size:", result.size);
+
+        const response = await fetch(result.uri);
+
+        console.log("Response--", response);
+
+        const blob = await response.blob();
+
+        console.log("Blob--", response);
+
+        const storageRef = ref(storage, result.name);
+
+        console.log("Resp Name--", response);
+
+        uploadBytes(storageRef, blob)
+          .then((snapshot) => {
+            return getDownloadURL(snapshot.ref);
+          })
+          .then((downloadURL) => {
+            console.log("File uploaded successfully!");
+            console.log("Download URL:", downloadURL);
+            setFileUrl(downloadURL);
+
+            // Use the downloadURL as needed (e.g., store in state, send to backend, etc.)
+          })
+          .catch((error) => {
+            console.log("Error uploading file:", error);
+          });
+
+        setFileName(result.name);
+      }
+    } catch (error) {
+      console.log("Error picking file:", error);
+      return null;
+    }
+  };
+
   const handleSubmit = async () => {
+    function makeid(length) {
+      let result = "";
+      const characters =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      const charactersLength = characters.length;
+      let counter = 0;
+      while (counter < length) {
+        result += characters.charAt(
+          Math.floor(Math.random() * charactersLength)
+        );
+        counter += 1;
+      }
+      return result;
+    }
+    const paymentID = makeid(6);
 
-    // Create a query to retrieve the document
-    const queryRef = query(
-      usersCollectionRef,
-      where("email", "==", email)
-    );
+    const jsonValue = await AsyncStorage.getItem("user");
+    if (jsonValue) {
+      const userData = JSON.parse(jsonValue);
+      setName(userData.name);
+      setEmail(userData.email);
+      setNid(userData.Nid);
+    }
 
-    if (name && name.length > 0) {
+    if (
+      name &&
+      name.length > 0 &&
+      fileUrl &&
+      fileUrl.length > 0 &&
+      amount &&
+      amount.length > 0
+    ) {
       setIsLoading(true);
 
-      const data = { name, Nid, email, password };
-      try {
-        // Get the documents that match the query
-        const querySnapshot = await getDocs(queryRef);
+      const data = {
+        paymentID,
+        companyName,
+        name,
+        Nid,
+        email,
+        address,
+        phone,
+        insuranceType,
+        amount,
+        fileUrl,
+      };
 
-        if (querySnapshot.empty) {
-          console.log("No matching documents.");
-          const docRef = await addDoc(usersCollectionRef, data);
-          console.log("Submitted:", docRef.id);
-          console.log("Submitted code--- :", code);
-          alert(`Your login code: ${code}`)
-          setIsLoading(false);
-          navigation.navigate("Login");
-        }
+      try {
+        const docRef = await addDoc(lifeInsuranceCollectionRef, data);
+        console.log("Submitted:", docRef.id);
         setIsLoading(false);
+        navigation.navigate("Life Insurance");
         return;
       } catch (error) {
         alert(error);
@@ -71,8 +163,8 @@ export default function () {
 
   return (
     <KeyboardAvoidingView>
-      <ScrollView>
-        <SafeAreaView className="bg-white h-screen  pt-4">
+      <ScrollView className="bg-white h-[100%]">
+        <SafeAreaView className="bg-white max-h-full">
           <View className="p-4 ">
             <Text className="text-md text-center text-lg font-medium">
               Welcome to insurance app!
@@ -83,44 +175,73 @@ export default function () {
             </Text>
 
             <View className="mt-10">
-              <Text className="text-gray-700 text-base mb-2">Full Name:</Text>
-              <TextInput
-                onChangeText={(text) => setName(text)}
-                value={name}
-                placeholder="Enter name..."
+              <Text className="text-gray-700 text-base mb-2">
+                Company Name:
+              </Text>
+              <SelectList
+                setSelected={(val) => setCompanyName(val)}
+                data={company}
+                save="value"
                 className="border border-[#932326] rounded-md p-2"
               />
             </View>
             <View className="mt-4">
-              <Text className="text-gray-700 text-base mb-2">Nid:</Text>
+              <Text className="text-gray-700 text-base mb-2">Address:</Text>
               <TextInput
-                onChangeText={(text) => setNid(text)}
-                value={Nid}
-                placeholder="Enter national id..."
+                onChangeText={(text) => setAddress(text)}
+                value={address}
+                placeholder="Enter address..."
                 className="border border-[#932326] rounded-md p-2"
               />
             </View>
-
             <View className="mt-4">
-              <Text className="text-gray-700 text-base mb-2">Email:</Text>
+              <Text className="text-gray-700 text-base mb-2">Phone:</Text>
               <TextInput
-                onChangeText={(text) => setEmail(text)}
-                value={email}
-                placeholder="Enter email..."
+                onChangeText={(text) => setPhone(text)}
+                value={phone}
+                placeholder="Enter phone..."
                 className="border border-[#932326] rounded-md p-2"
               />
             </View>
-
             <View className="mt-4">
-              <Text className="text-gray-700 text-base mb-2">Password:</Text>
-              <TextInput
-                onChangeText={(text) => setPass(text)}
-                value={password}
-                placeholder="Enter pass..."
+              <Text className="text-gray-700 text-base mb-2">
+                Insurance Type:
+              </Text>
+
+              <SelectList
+                setSelected={(val) => setInsuranceType(val)}
+                data={insurance_Type}
+                save="value"
                 className="border border-[#932326] rounded-md p-2"
               />
             </View>
+            <View className="mt-4">
+              <Text className="text-gray-700 text-base mb-2">Description:</Text>
+              <TextInput
+                onChangeText={(text) => setDescription(text)}
+                multiline={true}
+                numberOfLines={4}
+                value={description}
+                placeholder="Enter more details..."
+                className="border border-[#932326] rounded-md p-2"
+              />
+            </View>
+            <View className="mt-4">
+              <Text className="text-gray-700 text-base mb-2">Amount:</Text>
+              <TextInput
+                onChangeText={(text) => setAmount(text)}
+                value={amount}
+                placeholder="Enter amount..."
+                className="border border-[#932326] rounded-md p-2"
+              />
+            </View>
+            <View className="mt-4">
+              <Text className="text-gray-700 text-base mb-2">
+                Upload file: {!fileName ? "No file" : fileName}
+              </Text>
 
+              <Button title="Select File" onPress={handleFilePicker} />
+            </View>
             <TouchableOpacity
               onPress={handleSubmit}
               className="mt-6 bg-[#932326] px-4 py-2 rounded "

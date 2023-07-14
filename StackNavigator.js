@@ -24,7 +24,7 @@ import ClaimInsuranceScreen from "./screens/ClaimInsuranceScreen";
 
 import adminTabs from "./screens/adminTabs";
 import managerTabs from "./screens/managerTabs";
-import SalesTabs from "./screens/SalesTabs";
+import salesTabs from "./screens/salesTabs";
 
 export default function StackNavigator() {
   const Stack = createNativeStackNavigator();
@@ -54,7 +54,7 @@ export default function StackNavigator() {
       <Stack.Screen name="Claim Your Insurance" component={AddClaimInsuranceScreen} />
 
       <Stack.Screen name="General Manager" component={managerTabs} />
-      <Stack.Screen name="Sales Manager" component={SalesTabs} />
+      <Stack.Screen name="Sales Manager" component={salesTabs} />
       <Stack.Screen name="Claim Manager" component={ClaimInsuranceScreen} />
 
 

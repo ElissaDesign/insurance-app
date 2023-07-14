@@ -15,11 +15,6 @@ import { db } from "../Firebase";
 import {
   collection,
   getDocs,
-  getDoc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
   query,
   where,
 } from "firebase/firestore";
@@ -102,11 +97,12 @@ export default function () {
               className="mt-6 bg-[#932326] px-4 py-2 rounded-full w-20 h-20 flex items-center justify-center "
             >
               <Icon name="car-outline" size={40} color="#FFF" />
-
             </TouchableOpacity>
 
             <View>
-              <Text className="text-center text-lg font-semibold text-black">Motal insurance</Text>
+              <Text className="text-center text-lg font-semibold text-black">
+                Motal insurance
+              </Text>
             </View>
 
             <TouchableOpacity
@@ -114,28 +110,26 @@ export default function () {
               className="mt-6 bg-[#932326] px-4 py-2 rounded-full w-20 h-20 flex items-center justify-center "
             >
               <Icon name="person-outline" size={40} color="#FFF" />
-
             </TouchableOpacity>
 
-            <Text className=" text-center text-lg font-semibold text-black">Life insurance</Text>
-
+            <Text className=" text-center text-lg font-semibold text-black">
+              Life insurance
+            </Text>
 
             <TouchableOpacity
-              onPress={() => navigation.navigate("Claim")}
+              onPress={() => navigation.navigate("Claim Insurance")}
               className="mt-6 bg-[#932326] px-4 py-2 rounded-full w-20 h-20 flex items-center justify-center "
             >
               <Icon name="alert-circle-outline" size={40} color="#FFF" />
-
             </TouchableOpacity>
 
-            <Text className=" text-center text-lg font-semibold text-black">Claim</Text>
-
+            <Text className=" text-center text-lg font-semibold text-black">
+              Claim
+            </Text>
           </View>
 
-          <Text className="text-center text-sm mt-8">&copy; 2023,Insurance| for admins ||
-            <Text onPress={() => navigation.navigate("Login")}
-              className="text-black text-center ml-4"> Login</Text>
-
+          <Text className="text-center text-sm mt-8">
+            &copy; 2023,Insurance
           </Text>
         </SafeAreaView>
       </ScrollView>

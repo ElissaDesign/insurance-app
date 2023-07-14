@@ -9,29 +9,33 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   ScrollView,
+  Button,
 } from "react-native";
 import { SelectList } from "react-native-dropdown-select-list";
 import { db } from "../Firebase";
+import { storage } from "../Firebase";
 import { collection, addDoc } from "firebase/firestore";
+import * as DocumentPicker from "expo-document-picker";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
 
 export default function () {
-  const motalInsuranceCollectionRef = collection(db, "motalInsurance");
+  const claimInsuranceCollectionRef = collection(db, "claimInsurance");
 
   const company = [
     { key: "1", value: "Company", disabled: true },
     { key: "2", value: "Prime Insurance" },
     { key: "3", value: "Sonarwa Insurance" },
   ];
-  const typeofvehicl = [
-    { key: "1", value: "Vechicle Type", disabled: true },
-    { key: "2", value: "Carina" },
-    { key: "3", value: "Bajaj" },
-    { key: "4", value: "Audi" },
-  ];
-  const periodInsurance = [
-    { key: "1", value: "Insuramce", disabled: true },
-    { key: "2", value: "6 months" },
-    { key: "3", value: "1 year" },
+  const claim_Type = [
+    { key: "1", value: "Claim Type", disabled: true },
+    { key: "2", value: "Life Insurance" },
+    { key: "3", value: "Motal Insurance" },
   ];
 
   const [name, setName] = useState("");
@@ -41,15 +45,46 @@ export default function () {
   const [companyName, setCompanyName] = useState("");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
-  const [plateNumber, setPlateNumber] = useState("");
-  const [vehicleType, setVehicleType] = useState("");
-  const [ageOfManufacture, setageOfManufacture] = useState("");
-  const [insurancePeriod, setInsurancePeriod] = useState("");
-  const [amount, setAmount] = useState("");
+  const [claimType, setClaimType] = useState("");
+  const [description, setDescription] = useState("");
+
+  const [fileName, setFileName] = useState("");
+  const [fileUrl, setFileUrl] = useState("");
 
   const [isLoading, setIsLoading] = useState(false);
 
   const navigation = useNavigation();
+
+  const handleFilePicker = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync();
+      if (result.type === "success") {
+
+        const response = await fetch(result.uri);
+
+        const blob = await response.blob();
+
+        const storageRef = ref(storage, result.name);
+
+        uploadBytes(storageRef, blob)
+          .then((snapshot) => {
+            return getDownloadURL(snapshot.ref);
+          })
+          .then((downloadURL) => {
+            console.log("File uploaded successfully!");
+            console.log("Download URL:", downloadURL);
+            setFileUrl(downloadURL);
+          })
+          .catch((error) => {
+            console.log("Error uploading file:", error);
+          });
+
+        setFileName(result.name);
+      }
+    } catch (error) {
+      console.log("Error picking file:", error);
+    }
+  };
 
   const handleSubmit = async () => {
     function makeid(length) {
@@ -66,7 +101,7 @@ export default function () {
       }
       return result;
     }
-    const paymentID = makeid(5);
+    const claimID = makeid(6);
 
     const jsonValue = await AsyncStorage.getItem("user");
     if (jsonValue) {
@@ -79,33 +114,28 @@ export default function () {
     if (
       name &&
       name.length > 0 &&
-      plateNumber &&
-      plateNumber.length > 0 &&
-      amount &&
-      amount.length > 0
+      fileUrl &&
+      fileUrl.length > 0 
     ) {
       setIsLoading(true);
 
       const data = {
-        paymentID,
+        claimID,
         companyName,
         name,
         Nid,
         email,
         address,
         phone,
-        plateNumber,
-        vehicleType,
-        ageOfManufacture,
-        insurancePeriod,
-        amount,
+        claimType,
+        fileUrl,
       };
 
       try {
-        const docRef = await addDoc(motalInsuranceCollectionRef, data);
+        const docRef = await addDoc(claimInsuranceCollectionRef, data);
         console.log("Submitted:", docRef.id);
         setIsLoading(false);
-        navigation.navigate("Motal Insurance");
+        navigation.navigate("Claim Insurance");
         return;
       } catch (error) {
         alert(error);
@@ -113,32 +143,6 @@ export default function () {
       }
     }
   };
-
-  const handleSelect = (selectedValue) => {
-    console.log("Selected value:", selectedValue);
-  };
-
-  useEffect(() => {
-    if (vehicleType === "Bajaj" && insurancePeriod === "6 months") {
-      setAmount("38,200");
-    } else if (vehicleType === "Bajaj" && insurancePeriod === "1 year") {
-      setAmount("61,228");
-    } else if (
-      (vehicleType === "Carina" || vehicleType === "Audi") &&
-      insurancePeriod === "6 months"
-    ) {
-      setAmount("84,228");
-    } else if (
-      (vehicleType === "Carina" || vehicleType === "Audi") &&
-      insurancePeriod === "1 year"
-    ) {
-      setAmount("161,228");
-    }
-  }, [vehicleType, insurancePeriod]);
-
-  console.log("typ v: ", vehicleType);
-  console.log("TIME : ", insurancePeriod);
-  console.log("Amount : ", amount);
 
   return (
     <KeyboardAvoidingView>
@@ -163,12 +167,6 @@ export default function () {
                 save="value"
                 className="border border-[#932326] rounded-md p-2"
               />
-              {/* <TextInput
-                onChangeText={(text) => setCompanyName(text)}
-                value={companyName}
-                placeholder="Enter comp name..."
-                className="border border-[#932326] rounded-md p-2"
-              /> */}
             </View>
             <View className="mt-4">
               <Text className="text-gray-700 text-base mb-2">Address:</Text>
@@ -190,65 +188,40 @@ export default function () {
             </View>
             <View className="mt-4">
               <Text className="text-gray-700 text-base mb-2">
-                Plate Number:
-              </Text>
-              <TextInput
-                onChangeText={(text) => setPlateNumber(text)}
-                value={plateNumber}
-                placeholder="Enter plate number..."
-                className="border border-[#932326] rounded-md p-2"
-              />
-            </View>
-            <View className="mt-4">
-              <Text className="text-gray-700 text-base mb-2">
-                Vehicle Type:
-              </Text>
-              <SelectList
-                setSelected={(val) => setVehicleType(val)}
-                data={typeofvehicl}
-                save="value"
-                className="border border-[#932326] rounded-md p-2"
-              />
-            </View>
-            <View className="mt-4">
-              <Text className="text-gray-700 text-base mb-2">
-                Age of Manufacture:
-              </Text>
-              <TextInput
-                onChangeText={(text) => setageOfManufacture(text)}
-                value={ageOfManufacture}
-                placeholder="Enter age of manuf..."
-                className="border border-[#932326] rounded-md p-2"
-              />
-            </View>
-            <View className="mt-4">
-              <Text className="text-gray-700 text-base mb-2">
-                Insurance Period:
+                Claim Type:
               </Text>
 
               <SelectList
-                setSelected={(val) => setInsurancePeriod(val)}
-                data={periodInsurance}
+                setSelected={(val) => setClaimType(val)}
+                data={claim_Type}
                 save="value"
                 className="border border-[#932326] rounded-md p-2"
               />
             </View>
             <View className="mt-4">
-              <Text className="text-gray-700 text-base mb-2">Amount:</Text>
+              <Text className="text-gray-700 text-base mb-2">Description:</Text>
               <TextInput
-                onChangeText={(text) => setAmount(text)}
-                value={amount}
-                editable={false}
-                placeholder="Enter amount..."
+                onChangeText={(text) => setDescription(text)}
+                multiline={true}
+                numberOfLines={4}
+                value={description}
+                placeholder="Enter more details..."
                 className="border border-[#932326] rounded-md p-2"
               />
+            </View>
+            <View className="mt-4">
+              <Text className="text-gray-700 text-base mb-2">
+                Upload file: {!fileName ? "No file" : fileName}
+              </Text>
+
+              <Button title="Select File" onPress={handleFilePicker} />
             </View>
             <TouchableOpacity
               onPress={handleSubmit}
               className="mt-6 bg-[#932326] px-4 py-2 rounded "
             >
               <Text className="text-lg font-semibold text-white text-center">
-                {isLoading ? "Loading..." : "Pay"}
+                {isLoading ? "Loading..." : "Claim"}
               </Text>
             </TouchableOpacity>
           </View>

@@ -8,31 +8,24 @@ import {
   ScrollView,
   SafeAreaView,
   TouchableOpacity,
-  TextInput,
-  Modal,
-  Alert,
+  Linking,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { db } from "../Firebase";
 import {
   collection,
   getDocs,
-  getDoc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
   query,
   where,
 } from "firebase/firestore";
 
 export default function () {
-  const motalInsuranceCollectionRef = collection(db, "motalInsurance");
+  const claimInsuranceCollectionRef = collection(db, "claimInsurance");
 
   const navigation = useNavigation();
   const [email, setEmail] = useState("");
   const [nID, setNID] = useState("");
-  const [motalInsurance, setMotalInsurance] = useState();
+  const [claimInsurance, setClaimInsurance] = useState();
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -45,7 +38,7 @@ export default function () {
 
         try {
           const queryRef = query(
-            motalInsuranceCollectionRef,
+            claimInsuranceCollectionRef,
             where("Nid", "==", userData.Nid)
           );
 
@@ -64,7 +57,7 @@ export default function () {
             dataArray.push({ ...data });
           });
 
-          setMotalInsurance(dataArray);
+          setClaimInsurance(dataArray);
           setIsLoading(false);
         } catch (error) {
           alert(error);
@@ -81,7 +74,11 @@ export default function () {
     };
   }, []);
 
-  //   console.log("----<>========", motalInsurance)
+
+  const handleDownload = (downloadURL) => {
+    Linking.openURL(downloadURL);
+  };
+
   return (
     <KeyboardAvoidingView>
       <ScrollView className="bg-white h-[100%]">
@@ -89,7 +86,7 @@ export default function () {
           <View className="p-4 flex flex-col items-center justify-center ">
             <View>
               <Text className="my-4 text-center font-semibold text-base ">
-                All Payments!
+                All Claims!
               </Text>
 
               <Text className="text-md text-center text-base text-gray-700 mt-4">
@@ -99,23 +96,23 @@ export default function () {
 
               <View className="flex items-center justify-center ">
                 <TouchableOpacity
-                  onPress={() => navigation.navigate("Pay Motal Insurance")}
+                  onPress={() => navigation.navigate("Claim Your Insurance")}
                   className="mt-6 bg-[#932326] px-4 py-2 rounded-full w-24 h-24 flex items-center justify-center "
                 >
                   <Text className="text-center text-white text-xl">
-                    Click & Pay
+                    Claim
                   </Text>
                 </TouchableOpacity>
               </View>
 
-              {motalInsurance && motalInsurance.length == 0 ? (
-                <Text className="mt-8"> No payments available!</Text>
+              {claimInsurance && claimInsurance.length == 0 ? (
+                <Text className="mt-8"> No Claims available!</Text>
               ) : (
                 <View className="mt-8">
-                  {motalInsurance?.map((insurance) => {
+                  {claimInsurance?.map((insurance) => {
                     return (
                       <View
-                        key={insurance.paymentID}
+                        key={insurance.claimID}
                         className="mt-4 border border-[#932326]  w-full p-4 rounded shadow-md"
                       >
                         <View className="flex flex-row items-center justify-start">
@@ -123,24 +120,18 @@ export default function () {
                             {insurance.companyName}
                           </Text>
                           <Text className="text-black px-2 rounded ml-4">
-                            PaymentID: {insurance.paymentID}
+                            ClaimID: {insurance.claimID}
                           </Text>
                         </View>
                         <Text className="text-lg font-semibold">
-                          Plate N: {insurance.plateNumber}
+                          Claim Type: {insurance.claimType}
                         </Text>
-                        <Text className="text-base">
-                          Insurance Period: {insurance.insurancePeriod}
-                        </Text>
-                        <Text className="text-base">
-                          Age of Manufacture: {insurance.ageOfManufacture}
-                        </Text>
-                        <Text className="text-base">
-                          Vehicle Type: {insurance.vehicleType}
-                        </Text>
-                        <Text className="text-base">
-                          Amount: {insurance.amount}
-                        </Text>
+                        <TouchableOpacity className="bg-[#932326] w-20 mt-2 flex flex-row items-center rounded justify-between px-2 "  onPress={() => {
+                          handleDownload(insurance.fileUrl);
+                        }}>
+                        <Text className='text-base font-medium text-white'>File</Text>
+                        <Icon name="cloud-download-outline" size={20} color="#FFF" />
+                        </TouchableOpacity>
                       </View>
                     );
                   })}

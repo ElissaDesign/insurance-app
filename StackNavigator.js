@@ -3,8 +3,6 @@ import HomeScreen from "./screens/HomeScreen";
 import RegisterScreen from "./screens/RegisterScreen";
 import LoginScreen from "./screens/LoginScreen";
 import UserScreen from "./screens/UserScreen";
-import AdminScreen from "./screens/AdminScreen";
-import RequestScreen from "./screens/RequestScreen";
 
 // --------------Admin screens
 import AddManagersScreen from "./screens/AddManagersScreen";
@@ -17,10 +15,16 @@ import AddMotalInsuranceScreen from "./screens/AddMotalInsuranceScreen";
 import UserLifeInsuranceScreen from "./screens/UserLifeInsuranceScreen";
 import AddLifeInsuranceScreen from "./screens/AddLifeInsuranceScreen";
 
-import GeneralScreen from "./screens/GeneralScreen ";
-import SalesScreen from "./screens/SalesScreen";
-import ClaimScreen from "./screens/ClaimScreen";
+// --------------Claim
+import UserClaimInsuranceScreen from "./screens/UserClaimInsuranceScreen";
+import AddClaimInsuranceScreen from "./screens/AddClaimInsuranceScreen";
 
+
+import ClaimInsuranceScreen from "./screens/ClaimInsuranceScreen";
+
+import adminTabs from "./screens/adminTabs";
+import managerTabs from "./screens/managerTabs";
+import SalesTabs from "./screens/SalesTabs";
 
 export default function StackNavigator() {
   const Stack = createNativeStackNavigator();
@@ -32,10 +36,9 @@ export default function StackNavigator() {
 
       <Stack.Screen name="User" component={UserScreen} />
 
-      <Stack.Screen name="Request" component={RequestScreen} />
 
       {/* All about Admin */}
-      <Stack.Screen name="Admin" component={AdminScreen} />
+      <Stack.Screen name="Admin" component={adminTabs} />
       <Stack.Screen name="Invite Manager" component={AddManagersScreen} />
 
       {/* All about motal insurance */}
@@ -46,9 +49,13 @@ export default function StackNavigator() {
       <Stack.Screen name="Life Insurance" component={UserLifeInsuranceScreen} />
       <Stack.Screen name="Pay Life Insurance" component={AddLifeInsuranceScreen} />
 
-      <Stack.Screen name="General Manager" component={GeneralScreen} />
-      <Stack.Screen name="Sales Manager" component={SalesScreen} />
-      <Stack.Screen name="Claim Manager" component={ClaimScreen} />
+      {/* All about Claim insurance */}
+      <Stack.Screen name="Claim Insurance" component={UserClaimInsuranceScreen} />
+      <Stack.Screen name="Claim Your Insurance" component={AddClaimInsuranceScreen} />
+
+      <Stack.Screen name="General Manager" component={managerTabs} />
+      <Stack.Screen name="Sales Manager" component={SalesTabs} />
+      <Stack.Screen name="Claim Manager" component={ClaimInsuranceScreen} />
 
 
     </Stack.Navigator>

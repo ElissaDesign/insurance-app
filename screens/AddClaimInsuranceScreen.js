@@ -25,17 +25,17 @@ import {
 } from "firebase/storage";
 
 export default function () {
-  const lifeInsuranceCollectionRef = collection(db, "lifeInsurance");
+  const claimInsuranceCollectionRef = collection(db, "claimInsurance");
 
   const company = [
     { key: "1", value: "Company", disabled: true },
     { key: "2", value: "Prime Insurance" },
     { key: "3", value: "Sonarwa Insurance" },
   ];
-  const insurance_Type = [
-    { key: "1", value: "Insurance Type", disabled: true },
-    { key: "2", value: "Pansion" },
-    { key: "3", value: "Savings" },
+  const claim_Type = [
+    { key: "1", value: "Claim Type", disabled: true },
+    { key: "2", value: "Life Insurance" },
+    { key: "3", value: "Motal Insurance" },
   ];
 
   const [name, setName] = useState("");
@@ -45,9 +45,8 @@ export default function () {
   const [companyName, setCompanyName] = useState("");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
-  const [insuranceType, setInsuranceType] = useState("");
+  const [claimType, setClaimType] = useState("");
   const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
 
   const [fileName, setFileName] = useState("");
   const [fileUrl, setFileUrl] = useState("");
@@ -102,7 +101,7 @@ export default function () {
       }
       return result;
     }
-    const paymentID = makeid(6);
+    const claimID = makeid(6);
 
     const jsonValue = await AsyncStorage.getItem("user");
     if (jsonValue) {
@@ -116,30 +115,27 @@ export default function () {
       name &&
       name.length > 0 &&
       fileUrl &&
-      fileUrl.length > 0 &&
-      amount &&
-      amount.length > 0
+      fileUrl.length > 0 
     ) {
       setIsLoading(true);
 
       const data = {
-        paymentID,
+        claimID,
         companyName,
         name,
         Nid,
         email,
         address,
         phone,
-        insuranceType,
-        amount,
+        claimType,
         fileUrl,
       };
 
       try {
-        const docRef = await addDoc(lifeInsuranceCollectionRef, data);
+        const docRef = await addDoc(claimInsuranceCollectionRef, data);
         console.log("Submitted:", docRef.id);
         setIsLoading(false);
-        navigation.navigate("Life Insurance");
+        navigation.navigate("Claim Insurance");
         return;
       } catch (error) {
         alert(error);
@@ -192,12 +188,12 @@ export default function () {
             </View>
             <View className="mt-4">
               <Text className="text-gray-700 text-base mb-2">
-                Insurance Type:
+                Claim Type:
               </Text>
 
               <SelectList
-                setSelected={(val) => setInsuranceType(val)}
-                data={insurance_Type}
+                setSelected={(val) => setClaimType(val)}
+                data={claim_Type}
                 save="value"
                 className="border border-[#932326] rounded-md p-2"
               />
@@ -214,15 +210,6 @@ export default function () {
               />
             </View>
             <View className="mt-4">
-              <Text className="text-gray-700 text-base mb-2">Amount:</Text>
-              <TextInput
-                onChangeText={(text) => setAmount(text)}
-                value={amount}
-                placeholder="Enter amount..."
-                className="border border-[#932326] rounded-md p-2"
-              />
-            </View>
-            <View className="mt-4">
               <Text className="text-gray-700 text-base mb-2">
                 Upload file: {!fileName ? "No file" : fileName}
               </Text>
@@ -234,7 +221,7 @@ export default function () {
               className="mt-6 bg-[#932326] px-4 py-2 rounded "
             >
               <Text className="text-lg font-semibold text-white text-center">
-                {isLoading ? "Loading..." : "Pay"}
+                {isLoading ? "Loading..." : "Claim"}
               </Text>
             </TouchableOpacity>
           </View>

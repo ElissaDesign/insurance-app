@@ -54,30 +54,29 @@ export default function () {
   };
 
   const deleteDocsByQuery = async (code) => {
-    console.log("Code: " , code)
-  const queryRef = query(collection(db, "users"), where("code", "==", code));
+    console.log("Code: ", code);
+    const queryRef = query(collection(db, "users"), where("code", "==", code));
 
-  try {
-    const querySnapshot = await getDocs(queryRef);
+    try {
+      const querySnapshot = await getDocs(queryRef);
 
-    if (querySnapshot.empty) {
-      console.log("No matching documents found.");
-      return;
-    }
-
-    querySnapshot.forEach(async (doc) => {
-      try {
-        await deleteDoc(doc.ref);
-        console.log("Document deleted:", doc.id);
-      } catch (error) {
-        console.error("Error deleting document:", doc.id, error);
+      if (querySnapshot.empty) {
+        console.log("No matching documents found.");
+        return;
       }
-    });
-  } catch (error) {
-    console.error("Error retrieving documents:", error);
-  }
-};
 
+      querySnapshot.forEach(async (doc) => {
+        try {
+          await deleteDoc(doc.ref);
+          console.log("Document deleted:", doc.id);
+        } catch (error) {
+          console.error("Error deleting document:", doc.id, error);
+        }
+      });
+    } catch (error) {
+      console.error("Error retrieving documents:", error);
+    }
+  };
 
   useEffect(() => {
     const getData = async () => {
@@ -98,7 +97,7 @@ export default function () {
           const data = doc.data();
           dataArray.push({ ...data });
         });
-
+        console.log(dataArray);
         setRequests(dataArray);
         setIsLoading(false);
       } catch (error) {
@@ -115,28 +114,6 @@ export default function () {
     };
   }, []);
 
-  //  -------------------------
-
-  // useEffect(() => {
-  //   const getRequests = async () => {
-  //     const data = await getDocs(requestsCollectionRef);
-  //     const requestsData = data.docs.map((doc) => ({
-  //       ...doc.data(),
-  //       id: doc.id,
-  //     }));
-  //     setRequests(requestsData);
-  //   };
-
-  //   getRequests();
-
-  //   const interval = setInterval(getRequests, 3000);
-
-  //   return () => {
-  //     clearInterval(interval);
-  //   };
-  // }, []);
-
-  // console.log("R------", requests);
   return (
     <KeyboardAvoidingView>
       <ScrollView className="bg-white h-[100%]">
@@ -163,7 +140,7 @@ export default function () {
                 {requests.map((request) => {
                   return (
                     <View
-                      key={request.id}
+                      key={request?.code}
                       className="mt-4 border border-[#932326]  w-full p-4 rounded shadow-md"
                     >
                       <View className="flex flex-row items-center justify-start">
@@ -175,6 +152,9 @@ export default function () {
                         </Text>
                       </View>
                       <Text className="text-lg font-semibold">
+                        Company: {request.companyName}
+                      </Text>
+                      <Text className="text-base font-semibold">
                         NID: {request.Nid}
                       </Text>
                       <Text className="text-base">Email: {request.email}</Text>

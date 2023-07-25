@@ -1,4 +1,4 @@
-import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import {
   Text,
@@ -12,29 +12,61 @@ import {
 import Icon from "react-native-vector-icons/Ionicons";
 
 import { db } from "../Firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 export default function () {
-
   const motalInsuranceCollectionRef = collection(db, "claimInsurance");
 
   const [motalInsurance, setMotalInsurance] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const getMotalInsurances = async () => {
-      const data = await getDocs(motalInsuranceCollectionRef);
-      const MotalInsuranceData = data.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      }));
-      setMotalInsurance(MotalInsuranceData);
+    const getData = async () => {
+      const jsonValue = await AsyncStorage.getItem("user");
+      if (jsonValue) {
+        const userData = JSON.parse(jsonValue);
+        if (userData.role !== "general") {
+          try {
+            const queryRef = query(
+              motalInsuranceCollectionRef,
+              where("companyName", "==", userData.companyName)
+            );
+
+            // Get the documents that match the query
+            const querySnapshot = await getDocs(queryRef);
+
+            if (querySnapshot.empty) {
+              console.log("No matching documents.");
+              setIsLoading(false);
+              return;
+            }
+
+            const dataArray = [];
+            querySnapshot.forEach((doc) => {
+              const data = doc.data();
+              dataArray.push({ ...data });
+            });
+
+            setMotalInsurance(dataArray);
+            setIsLoading(false);
+          } catch (error) {
+            alert(error);
+            setIsLoading(false);
+          }
+        } else {
+          const data = await getDocs(motalInsuranceCollectionRef);
+          const MotalInsuranceData = data.docs.map((doc) => ({
+            ...doc.data(),
+            id: doc.id,
+          }));
+          setMotalInsurance(MotalInsuranceData);
+        }
+      }
     };
 
-    getMotalInsurances();
+    getData();
 
-    const interval = setInterval(getMotalInsurances, 3000);
-
+    const interval = setInterval(getData, 2000);
     return () => {
       clearInterval(interval);
     };
@@ -88,7 +120,7 @@ export default function () {
                       <Text className="text-base">
                         Claim Type: {insurance.claimType}
                       </Text>
-                      
+
                       <TouchableOpacity
                         className="bg-[#932326] w-20 mt-2 flex flex-row items-center rounded justify-between px-2 "
                         onPress={() => {

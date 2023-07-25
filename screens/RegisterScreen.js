@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   ScrollView,
 } from "react-native";
+import { SelectList } from "react-native-dropdown-select-list";
 import { db } from "../Firebase";
 import {
   collection,
@@ -32,14 +33,20 @@ export default function () {
   const [Nid, setNid] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPass] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const navigation = useNavigation();
 
-  const handleSubmit = async () => {
+  const company = [
+    { key: "1", value: "Company", disabled: true },
+    { key: "2", value: "Prime Insurance" },
+    { key: "3", value: "Sonarwa Insurance" },
+  ];
 
+  const handleSubmit = async () => {
     function generateRandomNumbers() {
-      var numbers = '';
+      var numbers = "";
       for (var i = 0; i < 3; i++) {
         var randomNumber = Math.floor(Math.random() * 100) + 1;
         numbers += randomNumber;
@@ -48,7 +55,7 @@ export default function () {
     }
 
     var code = generateRandomNumbers();
-    console.log("----code: ", code)
+    console.log("----code: ", code);
     // Create a query to retrieve the document
     const queryRef = query(
       usersCollectionRef,
@@ -59,7 +66,7 @@ export default function () {
     if (name && name.length > 0) {
       setIsLoading(true);
 
-      const data = { name, Nid, code, email, password };
+      const data = { name, Nid, code, companyName, email, password };
       try {
         // Get the documents that match the query
         const querySnapshot = await getDocs(queryRef);
@@ -68,8 +75,7 @@ export default function () {
           console.log("No matching documents.");
           const docRef = await addDoc(usersCollectionRef, data);
           console.log("Submitted:", docRef.id);
-          console.log("Submitted code--- :", code);
-          alert(`Your login code: ${code}`)
+          alert(`Your login code: ${code}`);
           setIsLoading(false);
           navigation.navigate("Login");
         }
@@ -110,6 +116,17 @@ export default function () {
                 onChangeText={(text) => setNid(text)}
                 value={Nid}
                 placeholder="Enter national id..."
+                className="border border-[#932326] rounded-md p-2"
+              />
+            </View>
+            <View className="mt-4">
+              <Text className="text-gray-700 text-base mb-2">
+                Company Name:
+              </Text>
+              <SelectList
+                setSelected={(val) => setCompanyName(val)}
+                data={company}
+                save="value"
                 className="border border-[#932326] rounded-md p-2"
               />
             </View>

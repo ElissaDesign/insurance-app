@@ -27,11 +27,6 @@ import {
 export default function () {
   const lifeInsuranceCollectionRef = collection(db, "lifeInsurance");
 
-  const company = [
-    { key: "1", value: "Company", disabled: true },
-    { key: "2", value: "Prime Insurance" },
-    { key: "3", value: "Sonarwa Insurance" },
-  ];
   const insurance_Type = [
     { key: "1", value: "Insurance Type", disabled: true },
     { key: "2", value: "Pansion" },
@@ -60,7 +55,6 @@ export default function () {
     try {
       const result = await DocumentPicker.getDocumentAsync();
       if (result.type === "success") {
-
         const response = await fetch(result.uri);
 
         const blob = await response.blob();
@@ -148,6 +142,23 @@ export default function () {
     }
   };
 
+  useEffect(() => {
+    const getData = async () => {
+      const jsonValue = await AsyncStorage.getItem("user");
+      if (jsonValue) {
+        const userData = JSON.parse(jsonValue);
+        setCompanyName(userData.companyName);
+      }
+    };
+
+    getData();
+
+    const interval = setInterval(getData, 2000);
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
   return (
     <KeyboardAvoidingView>
       <ScrollView className="bg-white h-[100%]">
@@ -160,18 +171,6 @@ export default function () {
               Until recently, the prevailing view assumed lorem ipsum was born
               as a nonsense text.
             </Text>
-
-            <View className="mt-10">
-              <Text className="text-gray-700 text-base mb-2">
-                Company Name:
-              </Text>
-              <SelectList
-                setSelected={(val) => setCompanyName(val)}
-                data={company}
-                save="value"
-                className="border border-[#932326] rounded-md p-2"
-              />
-            </View>
             <View className="mt-4">
               <Text className="text-gray-700 text-base mb-2">Address:</Text>
               <TextInput

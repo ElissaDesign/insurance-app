@@ -27,11 +27,6 @@ import {
 export default function () {
   const claimInsuranceCollectionRef = collection(db, "claimInsurance");
 
-  const company = [
-    { key: "1", value: "Company", disabled: true },
-    { key: "2", value: "Prime Insurance" },
-    { key: "3", value: "Sonarwa Insurance" },
-  ];
   const claim_Type = [
     { key: "1", value: "Claim Type", disabled: true },
     { key: "2", value: "Life Insurance" },
@@ -59,7 +54,6 @@ export default function () {
     try {
       const result = await DocumentPicker.getDocumentAsync();
       if (result.type === "success") {
-
         const response = await fetch(result.uri);
 
         const blob = await response.blob();
@@ -109,14 +103,10 @@ export default function () {
       setName(userData.name);
       setEmail(userData.email);
       setNid(userData.Nid);
+      setCompanyName(userData.companyName);
     }
 
-    if (
-      name &&
-      name.length > 0 &&
-      fileUrl &&
-      fileUrl.length > 0 
-    ) {
+    if (name && name.length > 0 && fileUrl && fileUrl.length > 0) {
       setIsLoading(true);
 
       const data = {
@@ -158,17 +148,6 @@ export default function () {
             </Text>
 
             <View className="mt-10">
-              <Text className="text-gray-700 text-base mb-2">
-                Company Name:
-              </Text>
-              <SelectList
-                setSelected={(val) => setCompanyName(val)}
-                data={company}
-                save="value"
-                className="border border-[#932326] rounded-md p-2"
-              />
-            </View>
-            <View className="mt-4">
               <Text className="text-gray-700 text-base mb-2">Address:</Text>
               <TextInput
                 onChangeText={(text) => setAddress(text)}
@@ -187,9 +166,7 @@ export default function () {
               />
             </View>
             <View className="mt-4">
-              <Text className="text-gray-700 text-base mb-2">
-                Claim Type:
-              </Text>
+              <Text className="text-gray-700 text-base mb-2">Claim Type:</Text>
 
               <SelectList
                 setSelected={(val) => setClaimType(val)}

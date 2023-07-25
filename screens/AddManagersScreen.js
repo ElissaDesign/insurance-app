@@ -23,11 +23,13 @@ import {
   query,
   where,
 } from "firebase/firestore";
+import { SelectList } from "react-native-dropdown-select-list";
 
 export default function () {
   const usersCollectionRef = collection(db, "users");
 
   const [name, setName] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [Nid, setNid] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
@@ -35,6 +37,17 @@ export default function () {
   const [isLoading, setIsLoading] = useState(false);
 
   const navigation = useNavigation();
+  const company = [
+    { key: "1", value: "Select Company", disabled: true },
+    { key: "2", value: "Prime Insurance" },
+    { key: "3", value: "Sonarwa Insurance" },
+  ];
+  const roles = [
+    { key: "1", value: "Select role", disabled: true },
+    { key: "2", value: "general" },
+    { key: "3", value: "sales" },
+    { key: "4", value: "claim" },
+  ];
 
   const handleSubmit = async () => {
     function generateRandomNumbers() {
@@ -59,7 +72,7 @@ export default function () {
     if (name && name.length > 0) {
       setIsLoading(true);
 
-      const data = { name, Nid, email, code, role, password };
+      const data = { companyName, name, Nid, email, code, role, password };
       try {
         // Get the documents that match the query
         const querySnapshot = await getDocs(queryRef);
@@ -94,6 +107,17 @@ export default function () {
             </Text>
 
             <View className="mt-10">
+              <Text className="text-gray-700 text-base mb-2">Company:</Text>
+
+              <SelectList
+                setSelected={(val) => setCompanyName(val)}
+                data={company}
+                save="value"
+                className="border border-[#932326] rounded-md p-2"
+              />
+            </View>
+
+            <View className="mt-4">
               <Text className="text-gray-700 text-base mb-2">Full Name:</Text>
               <TextInput
                 onChangeText={(text) => setName(text)}
@@ -126,10 +150,10 @@ export default function () {
               <Text className="text-gray-700 text-base mb-2">
                 Role:eg.general,sales,claim:
               </Text>
-              <TextInput
-                onChangeText={(text) => setRole(text)}
-                value={role}
-                placeholder="Enter role..."
+              <SelectList
+                setSelected={(val) => setRole(val)}
+                data={roles}
+                save="value"
                 className="border border-[#932326] rounded-md p-2"
               />
             </View>
